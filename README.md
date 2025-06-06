@@ -1,0 +1,1 @@
+The aim is to build a tool that can take a scanning of a piece of paper with diagrams, tables, handwritten notes, regular computer-printed text, images, and other information and turn it into digital data that is reformattable and useful.
