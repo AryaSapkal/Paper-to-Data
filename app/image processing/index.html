@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Image Upload with Icon</title>
+    <style>
+      .file-preview {
+        display: flex;
+        align-items: center;
+        margin-top: 20px;
+      }
+      .file-preview img.icon {
+        width: 32px;
+        height: 32px;
+        margin-right: 10px;
+      }
+      .file-preview img.uploaded {
+        max-height: 200px;
+        border: 1px solid #ccc;
+      }
+    </style>
+  </head>
+  <body>
+    <h2>Upload an Image</h2>
+    <input type="file" id="fileInput" accept="image/*" />
+    <div id="previewContainer"></div>
+
+    <script>
+      const fileInput = document.getElementById("fileInput");
+      const previewContainer = document.getElementById("previewContainer");
+
+      fileInput.addEventListener("change", function () {
+        const file = fileInput.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = function (e) {
+          // Clear previous preview
+          previewContainer.innerHTML = "";
+
+          // File icon (you could use your own icon or an emoji)
+          const icon = document.createElement("img");
+          icon.src = "https://cdn-icons-png.flaticon.com/512/337/337946.png"; // small file icon
+          icon.className = "icon";
+
+          // Uploaded image
+          const img = document.createElement("img");
+          img.src = e.target.result;
+          img.className = "uploaded";
+
+          const wrapper = document.createElement("div");
+          wrapper.className = "file-preview";
+          wrapper.appendChild(icon);
+          wrapper.appendChild(img);
+
+          previewContainer.appendChild(wrapper);
+        };
+
+        reader.readAsDataURL(file); // Image will be base64 encoded
+      });
+    </script>
+  </body>
+</html>
+
+<!-- 
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <button id="upload">Select a File</button><br />
+    <input type="file" id="fileInput" />
+
+    <script>
+      const fileInput = document.getElementById("fileInput");
+      const output = document.getElementById("output");
+
+      fileInput.addEventListener("change", function () {
+        const file = fileInput.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+
+        reader.onload = function (e) {
+          output.textContent = e.target.result;
+        };
+
+        reader.readAsText(file); // You can also use readAsArrayBuffer, readAsDataURL, etc.
+      });
+    </script>
+  </body>
+</html>
+-->
