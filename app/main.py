@@ -1,6 +1,5 @@
 from fastapi import FastAPI, File, UploadFile
-from pydantic import BaseModel
-import app.schemas as schemas
+from app.schemas import Image
 from dotenv import load_dotenv
 
 
@@ -17,10 +16,19 @@ app = FastAPI()
 # Database, FastAPI, Pycopg
 
 @app.get("/")
-def intro():
+def root():
     return {"message": "It works"}
 
+@app.get("/images")
+def get_images():
+    return {"data": "This are your images"}
 
+
+
+@app.post("/createimages")
+def create_images(new_image: Image):
+    print(new_image)
+    return {"data": "new image"}
 
 
 
