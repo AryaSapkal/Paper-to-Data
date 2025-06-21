@@ -1,13 +1,48 @@
 from fastapi import FastAPI, File, HTTPException, UploadFile
 from app.schemas import Image
 from dotenv import load_dotenv
+from datetime import datetime
 
 from random import randrange
+
+import psycopg2
+from psycopg2.extras import RealDictCursor
+
+import os
 
 
 app = FastAPI()
 
-#load_dotenv()
+load_dotenv()
+
+DB_NAME = os.getenv("DB_NAME")
+DB_USER = os.getenv("DB_USER")
+DB_PASSWORD = os.getenv("DB_PASSWORD")
+DB_HOST = os.getenv("DB_HOST")
+
+
+
+try:
+    conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER, password=DB_PASSWORD, host=DB_HOST)
+    cur = conn.cursor()
+    print("Connection successful")
+except Exception as e:
+    print("Connection failed")
+    print(f"Error: {e}")
+
+#cur.execute(
+    """
+    INSERT INTO images (filename, content, time_created, rating)
+    VALUES (%s, %s, %s, %s)
+    RETURNING id;
+"""#, ("title", "content of the image", datetime.now(), 4))
+
+
+
+
+
+
+
 
 
 
@@ -22,7 +57,11 @@ def root():
 
 @app.get("/images")
 def get_images():
-    return {"data": my_images}
+    cur.execute("""SELECT * FROM images""")
+    conn.commit()
+
+    images = cur.fetchall()
+    return {"data": images}
 
 
 
