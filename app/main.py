@@ -69,9 +69,19 @@ def get_images():
 def create_images(image: Image):
     # Take the new_image and store it in the database. Then, return the new image with the id as a dict
     image_dict = image.dict()
-    image_dict['id'] = randrange(0,1000000)
-    my_images.append(image_dict)
-    return image_dict
+    filename = image_dict['filename']
+    content = image_dict['content']
+    time_created = image_dict['time_created']
+    rating = image_dict['rating']
+
+    cur.execute("""INSERT INTO images (filename, content, time_created, rating) 
+                VALUES (%s, %s, %s, %s)
+                RETURNING id""",(filename, content, time_created, rating))
+    
+    conn.commit()
+    return {"data": image_dict}
+    
+
 
 
 
@@ -82,7 +92,7 @@ def update_images(id: int, image: Image):
     for i, item in enumerate(my_images):
         if item['id'] == id:
             updated_image = image.dict() # needs to be a dict representation of the image parameter, not the item (this wouldn't make use of what we want/passing in)
-            updated_image['id'] = id # keep the id of the image the same
+            updated_image['id'] = id # keep the same id as before, only update the other fields
             my_images[i] = updated_image
             return updated_image
 
