@@ -58,7 +58,6 @@ def root():
 @app.get("/images")
 def get_images():
     cur.execute("""SELECT * FROM images""")
-    conn.commit()
 
     images = cur.fetchall()
     return {"data": images}
@@ -84,11 +83,24 @@ def create_images(image: Image):
 
 
 
-
+# Currently working here, June 23, 2025
 @app.put("/images/{id}")
 def update_images(id: int, image: Image):
 
-    # find the image of id id in the array
+    cur.execute("""UPDATE images SET filename = %s, content = %s
+                WHERE id = %s""", (image.filename, image.content, str(id)))
+
+    updated_image = cur.fetchone()
+    conn.commit()
+
+    if not updated_image:
+        raise HTTPException(status_code=404, detail="Image not found")
+    
+    return updated_image
+    
+
+
+    """# find the image of id id in the array
     for i, item in enumerate(my_images):
         if item['id'] == id:
             updated_image = image.dict() # needs to be a dict representation of the image parameter, not the item (this wouldn't make use of what we want/passing in)
@@ -102,28 +114,36 @@ def update_images(id: int, image: Image):
     raise HTTPException(status_code=404, detail="Image not found")
 
 
-    # create an updated_image object and add
+    # create an updated_image object and add"""
 
 
 # Get one individual image
 @app.get("/images/{id}")
 def get_image(id: int):
-    for i, item in enumerate(my_images):
-        if item['id'] == id:
-            return item
-        
-    raise HTTPException(status_code=404, detail="Image not found")
+    cur.execute("""SELECT * FROM images WHERE id=%s""", (str(id),))
+    image_retrieved = cur.fetchall()
+    #conn.commit()
 
+    if not image_retrieved:
+        raise HTTPException(status_code=404, detail="Image not found")
+    
+    return image_retrieved
+
+
+# Delete an image
 @app.delete("/images/{id}")
 def delete_images(id: int):
 
-    for i, item in enumerate(my_images):
-        if item['id'] == id:
-            my_images.remove(item)
-            return {"data": "image removed"}
-
+    cur.execute("""DELETE FROM images
+                WHERE id = %s RETURNING *""", (str(id),))
     
-    raise HTTPException(status_code=404, detail="Image not found")
+    deleted_post = cur.fetchone()
+    conn.commit()
+
+    if not deleted_post:
+        raise HTTPException(status_code=404, detail="Image not found")
+    
+    return {"data": "image removed"}
 
 
 
