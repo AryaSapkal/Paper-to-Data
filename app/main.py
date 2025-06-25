@@ -30,12 +30,6 @@ except Exception as e:
     print("Connection failed")
     print(f"Error: {e}")
 
-#cur.execute(
-    """
-    INSERT INTO images (filename, content, time_created, rating)
-    VALUES (%s, %s, %s, %s)
-    RETURNING id;
-"""#, ("title", "content of the image", datetime.now(), 4))
 
 
 
@@ -48,8 +42,6 @@ except Exception as e:
 
 my_images = [{"title": "title of image 1", "content": "content of image 1", "id": 1}, {"title": "favorite foods", "content": "i like pizza", "id": 2}]
 
-# What we need for building CRUD
-# Database, FastAPI, Pycopg
 
 @app.get("/")
 def root():
@@ -82,13 +74,12 @@ def create_images(image: Image):
     
 
 
-
-# Currently working here, June 23, 2025
+# Update an image
 @app.put("/images/{id}")
 def update_images(id: int, image: Image):
 
-    cur.execute("""UPDATE images SET filename = %s, content = %s
-                WHERE id = %s""", (image.filename, image.content, str(id)))
+    cur.execute("""UPDATE images SET filename = %s, content = %s, rating=%s
+                WHERE id = %s RETURNING *""", (image.filename, image.content, image.rating, str(id)))
 
     updated_image = cur.fetchone()
     conn.commit()
@@ -100,21 +91,6 @@ def update_images(id: int, image: Image):
     
 
 
-    """# find the image of id id in the array
-    for i, item in enumerate(my_images):
-        if item['id'] == id:
-            updated_image = image.dict() # needs to be a dict representation of the image parameter, not the item (this wouldn't make use of what we want/passing in)
-            updated_image['id'] = id # keep the same id as before, only update the other fields
-            my_images[i] = updated_image
-            return updated_image
-
-        
-    
-    
-    raise HTTPException(status_code=404, detail="Image not found")
-
-
-    # create an updated_image object and add"""
 
 
 # Get one individual image
@@ -146,6 +122,26 @@ def delete_images(id: int):
     return {"data": "image removed"}
 
 
+
+# Accept a file from the user
+app.post("/files")
+def upload_image(file: UploadFile):
+    print("Uploaded filename:", file.filename)
+
+    file_dict = file.dict()
+    filename = file.filename
+    content_type = file_dict['content_type']
+    fileObject = file_dict['file']
+
+
+    cur.execute("""INSERT INTO image (filename, content)
+                    VALUES (%s, %s) RETURNING *""", (filename, fileObject))
+    
+
+
+    conn.commit()
+
+    return {"data": file_dict}
 
 
 
